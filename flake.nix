@@ -1,5 +1,5 @@
 {
-  description = "SPARKY modules and profiles";
+  description = "NixOS Modules for a network reliability and connectivity testing infrastructure";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
