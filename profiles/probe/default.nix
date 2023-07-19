@@ -69,18 +69,6 @@ in {
   };
 
   config = mkIf cfg.enable {
-    boot.loader.systemd-boot.enable = true;
-    # Copy the systemd-boot loader to the position of the windows boot loader,
-    # because for some reason some S920 ThinClients (with the same BIOS version
-    # and factory defaults!) find the bootloader in /boot/EFI/BOOT/BOOTX64.EFI
-    # and some don't find it there, but they find a windows boot loader and
-    # so we copy the systemd-boot loader to the position of the windows boot
-    # loader as a fallback.
-    boot.loader.systemd-boot.extraInstallCommands = ''
-      mkdir -p /boot/EFI/Microsoft/Boot
-      cp /boot/EFI/BOOT/BOOTX64.EFI /boot/EFI/Microsoft/Boot/bootmgfw.efi
-    '';
-
     boot.kernelParams = [
       "console=ttyS0,115200"
       "console=tty1"
