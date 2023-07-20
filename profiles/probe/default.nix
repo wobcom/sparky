@@ -80,6 +80,7 @@ in {
     # state directory and files
     systemd.tmpfiles.rules = [
       "d /var/lib/sparky                             0750 sparky sparky - -"
+      "f /var/lib/sparky/hostname                    0600 sparky sparky - -"
       "f /var/lib/sparky/config_repo_url             0600 sparky sparky - -"
       "f /var/lib/sparky/config_repo_access_token    0600 sparky sparky - -"
       "f /var/lib/sparky/config_repo_rev             0600 sparky sparky - -"
