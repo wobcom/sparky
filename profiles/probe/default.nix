@@ -100,7 +100,7 @@ in {
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
-      path = with pkgs; [ jq curl gnutar nixos-rebuild ];
+      path = with pkgs; [ jq curl gnutar nixos-rebuild gzip ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
