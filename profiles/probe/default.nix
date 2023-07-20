@@ -110,7 +110,7 @@ in {
       description = "SPARKY NixOS Update";
       wantedBy = [ "timers.target" ];
       timerConfig = {
-        OnCalendar = "OnCalendar=*:0/15"; # every 15 minutes
+        OnCalendar = "*:0/15"; # every 15 minutes
         AccuracySec = "1second";
       };
     };
