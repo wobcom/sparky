@@ -100,6 +100,9 @@ in {
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
+      # could trigger a restart loop and the service gets started
+      # by a timer, so it does not matter
+      restartIfChanged = false;
       path = with pkgs; [ jq curl gnutar nixos-rebuild gzip ];
       serviceConfig = {
         Type = "oneshot";
