@@ -91,6 +91,60 @@ in {
       "d /var/lib/sparky/config_download             0700 sparky sparky - -"
     ];
 
+    # add sparky user to nix trusted users for auto updating
+    nix.settings.trusted-users = [ "sparky" ];
+
+    # update service
+    systemd.services.sparky-update = {
+      description = "SPARKY NixOS Update";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      wantedBy = [ "multi-user.target" ];
+      path = with pkgs; [ jq curl gnutar nixos-rebuild ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+      script = ''
+        set -euo pipefail
+
+        # TODO: fetch current URL and access token from API at this point
+        HOSTNAME=$(cat /var/lib/sparky/hostname | tr -d '\n')
+        REPO_BASE_URL=$(cat /var/lib/sparky/config_repo_url | tr -d '\n')
+        REPO_ACCESS_TOKEN=$(cat /var/lib/sparky/config_repo_access_token | tr -d '\n')
+        REPO_BRANCH_URL=''${REPO_BASE_URL}/branches/main?private_token=''${REPO_ACCESS_TOKEN}
+        REPO_ARCHIVE_URL=''${REPO_BASE_URL}/archive.tar.gz?private_token=''${REPO_ACCESS_TOKEN}
+
+        # get current commit
+        CURRENT_COMMIT=$(curl $REPO_BRANCH_URL | jq -r .commit.id | tr -d '\n')
+        LATEST_KNOWN_COMMIT=$(cat /var/lib/sparky/config_repo_rev | tr -d '\n')
+
+        if [[ $CURRENT_COMMIT == $LATEST_KNOWN_COMMIT ]]; then
+          # we are up2date
+          exit 0
+        fi
+
+        # save current commit
+        echo $CURRENT_COMMIT > /var/lib/sparky/config_repo_rev
+
+        # clear download dir
+        rm -r /var/lib/sparky/config_download/*
+
+        # download latest version
+        curl $REPO_ARCHIVE_URL > /var/lib/sparky/config_download/archive.tar.gz
+
+        # clear config dir
+        rm -r /var/lib/sparky/config/*
+
+        # unpack new config
+        cd /var/lib/sparky/config
+        tar xvf /var/lib/sparky/config_download/archive.tar.gz --strip-components=1
+
+        # apply new config
+        nixos-rebuild switch --flake .#''${HOSTNAME}
+      '';
+    };
+
     # serial stuff
     boot.kernelParams = [
       "console=ttyS0,115200"
