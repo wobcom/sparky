@@ -96,8 +96,12 @@ in {
     security.sudo.extraRules = [
       {
         users = [ "sparky" ];
-        commands = [ "${pkgs.nixos-rebuild}/bin/nixos-rebuild" ];
-        options = [ "NOPASSWD" ];
+        commands = [
+          {
+            command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild";
+            options = [ "NOPASSWD" ];
+          }
+        ];
       }
     ];
 
