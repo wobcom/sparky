@@ -77,6 +77,18 @@ in {
 
     users.groups.sparky = {};
 
+    # state directory and files
+    systemd.tmpfiles.rules = [
+      "d /var/lib/sparky                             0750 sparky sparky - -"
+      "f /var/lib/sparky/config_repo_url             0600 sparky sparky - -"
+      "f /var/lib/sparky/config_repo_access_token    0600 sparky sparky - -"
+      "f /var/lib/sparky/api_key                     0600 sparky sparky - -"
+      "f /var/lib/sparky/ts_preauthkey               0600 sparky sparky - -"
+      "f /var/lib/sparky/ts_ip                       0600 sparky sparky - -"
+      "d /var/lib/sparky/config                      0700 sparky sparky - -"
+      "d /var/lib/sparky/config_download             0700 sparky sparky - -"
+    ];
+
     # serial stuff
     boot.kernelParams = [
       "console=ttyS0,115200"
