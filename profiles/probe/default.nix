@@ -103,7 +103,9 @@ in {
       path = with pkgs; [ jq curl gnutar nixos-rebuild gzip ];
       serviceConfig = {
         Type = "oneshot";
-        RemainAfterExit = true;
+        WorkingDirectory = "/var/lib/sparky";
+        User = "sparky";
+        Group = "sparky";
       };
       script = ''
         set -euo pipefail
