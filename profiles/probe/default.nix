@@ -97,9 +97,6 @@ in {
     # update service
     systemd.services.sparky-update = {
       description = "SPARKY NixOS Update";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
-      wantedBy = [ "multi-user.target" ];
       # could trigger a restart loop and the service gets started
       # by a timer, so it does not matter
       restartIfChanged = false;
