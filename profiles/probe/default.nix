@@ -128,13 +128,13 @@ in {
         echo $CURRENT_COMMIT > /var/lib/sparky/config_repo_rev
 
         # clear download dir
-        rm -r /var/lib/sparky/config_download/*
+        rm -rf /var/lib/sparky/config_download/*
 
         # download latest version
         curl $REPO_ARCHIVE_URL > /var/lib/sparky/config_download/archive.tar.gz
 
         # clear config dir
-        rm -r /var/lib/sparky/config/*
+        rm -rf /var/lib/sparky/config/*
 
         # unpack new config
         cd /var/lib/sparky/config
