@@ -163,8 +163,11 @@ in {
         cd /var/lib/sparky/config
         tar xvf /var/lib/sparky/config_download/archive.tar.gz --strip-components=1
 
+        # nixos-rebuild needs sudo in its path
+        export PATH=/run/wrappers/bin:$PATH
+
         # apply new config
-        /run/wrappers/bin/sudo nixos-rebuild switch --flake .#''${HOSTNAME}
+        sudo nixos-rebuild switch --flake .#''${HOSTNAME}
       '';
     };
 
