@@ -86,7 +86,6 @@ in {
     # Limit SSH to tailnet IP
     services.openssh.openFirewall = mkForce false;
 
-
     # Firewall limitations to tailnet IPs
     networking.firewall.extraInputRules = (''
       ip6 daddr ${cfg.ip} ip6 saddr ${cfg.headscaleIP} tcp dport 22 accept comment "SSH from headscale"
@@ -141,7 +140,7 @@ in {
     };
     # Wait for DNS after boot, then wait additional 10 seconds to make sure smokeping is ready
     systemd.services.prometheus-smokeping-exporter.after = [ "smokeping-ready.service" ];
-    
+
     systemd.services.smokeping-ready = {
       description = "Helper service to delay smokeping start after boot";
       after = [ "network-online.target" "nss-lookup.target" ];
