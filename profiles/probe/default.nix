@@ -164,7 +164,7 @@ in {
         tar xvf /var/lib/sparky/config_download/archive.tar.gz --strip-components=1
 
         # apply new config
-        sudo nixos-rebuild switch --flake .#''${HOSTNAME}
+        /run/wrappers/bin/sudo nixos-rebuild switch --flake .#''${HOSTNAME}
       '';
     };
 
