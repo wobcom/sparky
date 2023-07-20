@@ -92,8 +92,14 @@ in {
       "d /var/lib/sparky/config_download             0700 sparky sparky - -"
     ];
 
-    # add sparky user to nix trusted users for auto updating
-    nix.settings.trusted-users = [ "sparky" ];
+    # allow sparky system user "sudo nixos-rebuild"
+    security.sudo.extraRules = [
+      {
+        users = [ "sparky" ];
+        commands = [ "${pkgs.nixos-rebuild}/bin/nixos-rebuild" ];
+        options = [ "NOPASSWD" ];
+      }
+    ];
 
     # update service timer
     systemd.timers.sparky-update = {
@@ -154,7 +160,7 @@ in {
         tar xvf /var/lib/sparky/config_download/archive.tar.gz --strip-components=1
 
         # apply new config
-        nixos-rebuild switch --flake .#''${HOSTNAME}
+        sudo nixos-rebuild switch --flake .#''${HOSTNAME}
       '';
     };
 
