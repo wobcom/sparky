@@ -69,6 +69,7 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # serial stuff
     boot.kernelParams = [
       "console=ttyS0,115200"
       "console=tty1"
@@ -77,6 +78,8 @@ in {
     # Limit SSH to tailnet IP
     services.openssh.openFirewall = mkForce false;
 
+
+    # Firewall limitations to tailnet IPs
     networking.firewall.extraInputRules = (''
       ip6 daddr ${cfg.ip} ip6 saddr ${cfg.headscaleIP} tcp dport 22 accept comment "SSH from headscale"
       ip6 daddr ${cfg.ip} ip6 saddr ${cfg.prometheusIP} tcp dport ${toString config.services.prometheus.exporters.node.port} accept comment "Node Exporter"
@@ -85,17 +88,20 @@ in {
       ip6 daddr ${cfg.ip} ip6 saddr ${cfg.prometheusIP} tcp dport ${toString config.services.prometheus-local.exporters.iperf3.port} accept comment "iperf3 Exporter"
     '');
 
-    networking.useDHCP = true;
-
+    # we need nftables for our firewall rules above
     networking.nftables.enable = true;
 
+    # the probes get their IPs over DHCP
+    networking.useDHCP = true;
+
+    # configure tailnet -- legacy, ip and preauthkey will come from the API in the future
     profiles.tailnet = {
       enable = true;
       ip = cfg.ip;
       preAuthKey = cfg.preAuthKey;
     };
 
-    # Prometheus
+    # Prometheus -- legacy, will be relpaces with influx for offline monitoring
     services.prometheus.exporters.node = {
       enable = true;
       listenAddress = "[${cfg.ip}]";
