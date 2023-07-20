@@ -69,6 +69,14 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # system users
+    users.users.sparky = {
+      isSystemUser = true;
+      group = "sparky";
+    };
+
+    users.groups.sparky = {};
+
     # serial stuff
     boot.kernelParams = [
       "console=ttyS0,115200"
