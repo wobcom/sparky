@@ -82,6 +82,7 @@ in {
       "d /var/lib/sparky                             0750 sparky sparky - -"
       "f /var/lib/sparky/config_repo_url             0600 sparky sparky - -"
       "f /var/lib/sparky/config_repo_access_token    0600 sparky sparky - -"
+      "f /var/lib/sparky/config_repo_rev             0600 sparky sparky - -"
       "f /var/lib/sparky/api_key                     0600 sparky sparky - -"
       "f /var/lib/sparky/ts_preauthkey               0600 sparky sparky - -"
       "f /var/lib/sparky/ts_ip                       0600 sparky sparky - -"
