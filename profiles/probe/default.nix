@@ -94,6 +94,16 @@ in {
     # add sparky user to nix trusted users for auto updating
     nix.settings.trusted-users = [ "sparky" ];
 
+    # update service timer
+    systemd.timers.sparky-update = {
+      description = "SPARKY NixOS Update";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "OnCalendar=*:0/15"; # every 15 minutes
+        AccuracySec = "1second";
+      };
+    };
+
     # update service
     systemd.services.sparky-update = {
       description = "SPARKY NixOS Update";
