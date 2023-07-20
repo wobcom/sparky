@@ -69,9 +69,10 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # system users
+    # system user
     users.users.sparky = {
       isSystemUser = true;
+      home = "/var/lib/sparky";
       group = "sparky";
     };
 
