@@ -135,7 +135,7 @@ in {
 
         API_KEY=$(cat /var/lib/sparky/api_key | tr -d '\n')
         CONFIG_JSON=$(curl -X POST -F api-key=$API_KEY ${cfg.webURL}/api/v1/probe-update)
-        HOSTNAME=$(echo $CONFIG_JSON | jq -r '.data.hostname | tr -d '\n')
+        HOSTNAME=$(echo $CONFIG_JSON | jq -r .data.hostname | tr -d '\n')
         REPO_BASE_URL=$(echo $CONFIG_JSON | jq -r '.data."repo-url"' | tr -d '\n')
         REPO_ACCESS_TOKEN=$(echo $CONFIG_JSON | jq -r '.data."access-token"' | tr -d '\n')
 
