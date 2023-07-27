@@ -7,6 +7,7 @@
 
   outputs = { self, nixpkgs, ... }: {
     nixosModules.probe = ./profiles/probe;
+    nixosModules.sparky-web = ./profiles/sparky-web;
     nixosModules.tailnet = ./profiles/tailnet;
     nixosModules.iperf3-exporter = ./modules/iperf3-exporter;
     nixosModules.default = ./modules.nix;
