@@ -36,6 +36,13 @@ in {
       '';
     };
 
+    webURL = mkOption {
+      type = types.str;
+      description = mdDoc ''
+        URL of the SPARKY-Web server. Must not have a tailing slash.
+      '';
+    };
+
     iperf3 = {
       enable = mkOption {
         type = types.bool;
@@ -81,9 +88,6 @@ in {
     # state directory and files
     systemd.tmpfiles.rules = [
       "d /var/lib/sparky                             0750 sparky sparky - -"
-      "f /var/lib/sparky/hostname                    0600 sparky sparky - -"
-      "f /var/lib/sparky/config_repo_url             0600 sparky sparky - -"
-      "f /var/lib/sparky/config_repo_access_token    0600 sparky sparky - -"
       "f /var/lib/sparky/config_repo_rev             0600 sparky sparky - -"
       "f /var/lib/sparky/api_key                     0600 sparky sparky - -"
       "d /var/lib/sparky/config                      0700 sparky sparky - -"
@@ -129,10 +133,12 @@ in {
       script = ''
         set -euo pipefail
 
-        # TODO: fetch current URL and access token from API at this point
-        HOSTNAME=$(cat /var/lib/sparky/hostname | tr -d '\n')
-        REPO_BASE_URL=$(cat /var/lib/sparky/config_repo_url | tr -d '\n')
-        REPO_ACCESS_TOKEN=$(cat /var/lib/sparky/config_repo_access_token | tr -d '\n')
+        API_KEY=$(cat /var/lib/sparky/api_key | tr -d '\n')
+        CONFIG_JSON=$(curl -X POST -F api-key=$API_KEY ${cfg.webURL}/api/v1/probe-update)
+        HOSTNAME=$(echo $CONFIG_JSON | jq -r '.data.hostname | tr -d '\n')
+        REPO_BASE_URL=$(echo $CONFIG_JSON | jq -r '.data."repo-url"' | tr -d '\n')
+        REPO_ACCESS_TOKEN=$(echo $CONFIG_JSON | jq -r '.data."access-token"' | tr -d '\n')
+
         REPO_BRANCH_URL=''${REPO_BASE_URL}/branches/main?private_token=''${REPO_ACCESS_TOKEN}
         REPO_ARCHIVE_URL=''${REPO_BASE_URL}/archive.tar.gz?private_token=''${REPO_ACCESS_TOKEN}
 
