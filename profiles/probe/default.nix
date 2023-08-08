@@ -175,12 +175,6 @@ in {
       '';
     };
 
-    # serial stuff
-    boot.kernelParams = [
-      "console=ttyS0,115200"
-      "console=tty1"
-    ];
-
     # Limit SSH to tailnet IP
     services.openssh.openFirewall = mkForce false;
 
