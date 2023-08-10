@@ -14,13 +14,13 @@ let
 
 in py.pkgs.buildPythonApplication rec {
   pname = "sparky-web";
-  version = "1.0.0";
+  version = "1.1.0";
 
   src = fetchFromGitHub {
     owner = "wobcom";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-QOENkZHxxrSa/FeVnRCGySf8sWPcB0jx9jDB1f3+4l8=";
+    sha256 = "sha256-xqoMtrcEtT/CM7O7h5JLmkmCW1jV1ClqsvibtDIjENc=";
   };
 
   format = "other";

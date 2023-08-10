@@ -3,9 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, ... }: {
+  outputs = { self, nixpkgs, flake-utils, ... }: {
     nixosModules.probe = ./profiles/probe;
     nixosModules.sparky-web = ./profiles/sparky-web;
     nixosModules.tailnet = ./profiles/tailnet;
@@ -14,5 +15,12 @@
     nixosModules.default = ./modules.nix;
 
     overlays.default = (import ./pkgs);
-  };
+  } // flake-utils.lib.eachDefaultSystem (system: let
+    pkgs = nixpkgs.legacyPackages.${system};
+  in {
+    packages = {
+      prometheus-iperf3-exporter = pkgs.callPackage ./pkgs/iperf3-exporter { };
+      sparky-web = pkgs.callPackage ./pkgs/sparky-web { };
+    };
+  });
 }
