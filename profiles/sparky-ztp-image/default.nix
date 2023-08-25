@@ -42,6 +42,7 @@ in {
       "d /var/lib/sparky                             0750 sparky sparky - -"
       "f /var/lib/sparky/config_repo_rev             0600 sparky sparky - -"
       "f /var/lib/sparky/api_key                     0600 sparky sparky - -"
+      "f /var/lib/sparky/metrics_bearer              0600 sparky sparky - -"
       "d /var/lib/sparky/config                      0700 sparky sparky - -"
       "d /var/lib/sparky/config_download             0700 sparky sparky - -"
     ];
@@ -87,9 +88,12 @@ in {
         PROBE_INIT_JSON=$(curl -X POST -F mac=$MAC_ADDRESS ${cfg.webURL}/api/v1/probe-init)
         API_KEY=$(echo $PROBE_INIT_JSON | jq -r '.data."api-key"' | tr -d '\n')
         HOSTNAME=$(echo $PROBE_INIT_JSON | jq -r .data.hostname | tr -d '\n')
+        METRICS_BEARER=$(echo $CONFIG_JSON | jq -r '.data."metrics-bearer"' | tr -d '\n')
+
         REPO_BASE_URL=$(echo $PROBE_INIT_JSON | jq -r '.data."repo-url"' | tr -d '\n')
         REPO_ACCESS_TOKEN=$(echo $PROBE_INIT_JSON | jq -r '.data."access-token"' | tr -d '\n')
 
+        echo $METRICS_BEARER > /var/lib/sparky/metrics_bearer
         echo $API_KEY > /var/lib/sparky/api_key
 
         REPO_BRANCH_URL=''${REPO_BASE_URL}/branches/main?private_token=''${REPO_ACCESS_TOKEN}

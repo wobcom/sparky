@@ -90,6 +90,7 @@ in {
       "d /var/lib/sparky                             0750 sparky sparky - -"
       "f /var/lib/sparky/config_repo_rev             0600 sparky sparky - -"
       "f /var/lib/sparky/api_key                     0600 sparky sparky - -"
+      "f /var/lib/sparky/metrics_bearer              0600 sparky sparky - -"
       "d /var/lib/sparky/config                      0700 sparky sparky - -"
       "d /var/lib/sparky/config_download             0700 sparky sparky - -"
     ];
@@ -138,9 +139,13 @@ in {
         HOSTNAME=$(echo $CONFIG_JSON | jq -r .data.hostname | tr -d '\n')
         REPO_BASE_URL=$(echo $CONFIG_JSON | jq -r '.data."repo-url"' | tr -d '\n')
         REPO_ACCESS_TOKEN=$(echo $CONFIG_JSON | jq -r '.data."access-token"' | tr -d '\n')
+        METRICS_BEARER=$(echo $CONFIG_JSON | jq -r '.data."metrics-bearer"' | tr -d '\n')
 
         REPO_BRANCH_URL=''${REPO_BASE_URL}/branches/main?private_token=''${REPO_ACCESS_TOKEN}
         REPO_ARCHIVE_URL=''${REPO_BASE_URL}/archive.tar.gz?private_token=''${REPO_ACCESS_TOKEN}
+
+        # save metrics bearer
+        echo $METRICS_BEARER > /var/lib/sparky/metrics_bearer
 
         # get current commit
         CURRENT_COMMIT=$(curl $REPO_BRANCH_URL | jq -r .commit.id | tr -d '\n')
