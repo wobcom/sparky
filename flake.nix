@@ -7,9 +7,10 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, ... }: {
+    nixosModules.sparky-metrics = ./profiles/sparky-metrics;
     nixosModules.sparky-probe = ./profiles/sparky-probe;
-    nixosModules.sparky-web = ./profiles/sparky-web;
     nixosModules.sparky-tailnet = ./profiles/sparky-tailnet;
+    nixosModules.sparky-web = ./profiles/sparky-web;
     nixosModules.sparky-ztp-image = ./profiles/sparky-ztp-image;
     nixosModules.iperf3-exporter = ./modules/iperf3-exporter;
     nixosModules.default = ./modules.nix;

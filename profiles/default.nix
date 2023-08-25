@@ -2,9 +2,10 @@
 
 {
   imports = [
+    ./sparky-metrics
     ./sparky-probe
-    ./sparky-web
     ./sparky-tailnet
+    ./sparky-web
     ./sparky-ztp-image
   ];
 }
