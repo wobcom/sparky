@@ -23,10 +23,10 @@ in {
       '';
     };
 
-    headscaleFQDN = mkOption {
+    headscaleURL = mkOption {
       type = types.str;
       description = mdDoc ''
-        FQDN of the headscale server.
+        URL of the headscale server.
       '';
     };
   };
@@ -53,7 +53,7 @@ in {
         RemainAfterExit = true;
       };
       script = ''
-        ${pkgs.tailscale}/bin/tailscale up --login-server https://${cfg.headscaleFQDN} --advertise-routes ${cfg.ip}/128 --accept-routes ${optionalString (cfg.preAuthKey != null) "--auth-key ${cfg.preAuthKey}"}
+        ${pkgs.tailscale}/bin/tailscale up --login-server ${cfg.headscaleURL} --advertise-routes ${cfg.ip}/128 --accept-routes ${optionalString (cfg.preAuthKey != null) "--auth-key ${cfg.preAuthKey}"}
       '';
     };
 
