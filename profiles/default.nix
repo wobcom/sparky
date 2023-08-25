@@ -2,9 +2,9 @@
 
 {
   imports = [
-    ./probe
+    ./sparky-probe
     ./sparky-web
-    ./tailnet
-    ./ztp-image
+    ./sparky-tailnet
+    ./sparky-ztp-image
   ];
 }

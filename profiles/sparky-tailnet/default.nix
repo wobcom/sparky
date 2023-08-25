@@ -2,9 +2,9 @@
 
 with lib;
 
-let cfg = config.profiles.tailnet;
+let cfg = config.profiles.sparky-tailnet;
 in {
-  options.profiles.tailnet = {
+  options.profiles.sparky-tailnet = {
     enable = mkEnableOption (mdDoc "Enable the SPARKY tailnet profile");
 
     ip = mkOption {

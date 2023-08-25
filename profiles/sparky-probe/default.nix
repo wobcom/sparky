@@ -2,9 +2,9 @@
 
 with lib;
 
-let cfg = config.profiles.probe;
+let cfg = config.profiles.sparky-probe;
 in {
-  options.profiles.probe = {
+  options.profiles.sparky-probe = {
     enable = mkEnableOption (mdDoc "Enable the SPARKY probe profile");
 
     ip = mkOption {
@@ -194,7 +194,7 @@ in {
     networking.useDHCP = true;
 
     # configure tailnet -- legacy, ip and preauthkey will come from the API in the future
-    profiles.tailnet = {
+    profiles.sparky-tailnet = {
       enable = true;
       ip = cfg.ip;
       preAuthKey = cfg.preAuthKey;

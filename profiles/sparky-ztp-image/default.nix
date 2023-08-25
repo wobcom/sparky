@@ -2,9 +2,9 @@
 
 with lib;
 
-let cfg = config.profiles.ztp-image;
+let cfg = config.profiles.sparky-ztp-image;
 in {
-  options.profiles.ztp-image = {
+  options.profiles.sparky-ztp-image = {
     enable = mkEnableOption (mdDoc "Enable the SPARKY ZTP image profile");
 
     webURL = mkOption {
