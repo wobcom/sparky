@@ -193,7 +193,7 @@ in {
     # the probes get their IPs over DHCP
     networking.useDHCP = true;
 
-    # configure tailnet -- legacy, ip and preauthkey will come from the API in the future
+    # configure tailnet
     profiles.sparky-tailnet = {
       enable = true;
       ip = cfg.ip;
