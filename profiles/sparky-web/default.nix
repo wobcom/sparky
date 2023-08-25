@@ -26,6 +26,9 @@ let
       with open("${cfg.probeRepoAccessTokenFile}", "r") as file:
         PROBE_REPO_ACCESS_TOKEN = file.readline()
 
+      with open("${cfg.metricsApiKeyFile}", "r") as file:
+        METRICS_API_KEY = file.readline()
+
       ${cfg.extraConfig}
     '';
   };
@@ -123,6 +126,14 @@ in {
       description = mdDoc ''
         Path to a file containing the GitLab access token for the probes config repo.
         This token is given to the probes. Please use a read-only token.
+      '';
+    };
+
+    metricsApiKeyFile = mkOption {
+      type = types.path;
+      description = mdDoc ''
+        Path to a file containing the API key for the metrics host to update the bearer
+        tokens for the probes from SPARKY-Web. Use a long, auto generated password for this.
       '';
     };
 
