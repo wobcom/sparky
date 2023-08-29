@@ -22,10 +22,10 @@ in {
       '';
     };
 
-    prometheusIP = mkOption {
+    metricsIP = mkOption {
       type = types.str;
       description = mdDoc ''
-        IP of the prometheus server in the tailnet.
+        IP of the metrics server in the tailnet.
       '';
     };
 
@@ -41,6 +41,55 @@ in {
       description = mdDoc ''
         URL of the SPARKY-Web server. Must not have a tailing slash.
       '';
+    };
+
+    traceroute = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = mdDoc ''
+          Enable traceroute tests from this probe.
+        '';
+      };
+      targets = mkOption {
+        type = types.listOf types.str;
+        description = mdDoc ''
+          Targets for the traceroute tests.
+        '';
+        default = [
+          "a400.speedtest.wobcom.de"
+          "a209.speedtest.wobcom.de"
+          "a210.speedtest.wobcom.de"
+        ];
+      };
+    };
+
+    smokeping = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = mdDoc ''
+          Enable smokeping tests from this probe.
+        '';
+      };
+      targets = mkOption {
+        type = types.listOf types.str;
+        description = mdDoc ''
+          Targets for the smokeping tests.
+        '';
+        default = [
+          "a400.speedtest.wobcom.de"
+          "a209.speedtest.wobcom.de"
+          "a210.speedtest.wobcom.de"
+        ];
+      };
+      onlineCheckTarget = mkOption {
+        type = types.str;
+        default = "wobcom.de";
+        description = mdDoc ''
+          Target for checking if DNS resolution works.
+        '';
+      };
     };
 
     iperf3 = {
@@ -186,10 +235,6 @@ in {
     # Firewall limitations to tailnet IPs
     networking.firewall.extraInputRules = (''
       ip6 daddr ${cfg.ip} ip6 saddr ${cfg.headscaleIP} tcp dport 22 accept comment "SSH from headscale"
-      ip6 daddr ${cfg.ip} ip6 saddr ${cfg.prometheusIP} tcp dport ${toString config.services.prometheus.exporters.node.port} accept comment "Node Exporter"
-      ip6 daddr ${cfg.ip} ip6 saddr ${cfg.prometheusIP} tcp dport ${toString config.services.prometheus.exporters.smokeping.port} accept comment "Smokeping Exporter"
-    '' + optionalString cfg.iperf3.enable ''
-      ip6 daddr ${cfg.ip} ip6 saddr ${cfg.prometheusIP} tcp dport ${toString config.services.prometheus-local.exporters.iperf3.port} accept comment "iperf3 Exporter"
     '');
 
     # we need nftables for our firewall rules above
@@ -205,7 +250,110 @@ in {
       preAuthKey = cfg.preAuthKey;
     };
 
-    # Prometheus -- legacy, will be relpaces with influx for offline monitoring
+    # vmagent, module from unstable / 23.11 is required here
+    services.vmagent = {
+      enable = true;
+      package = pkgs.victoriametrics;
+      remoteWriteUrl = "http://[${cfg.metricsIP}]/remote_write";
+      extraArgs = [ "-remoteWrite.bearerTokenFile=/run/vmagent/bearer_token" "-enableTCP6" ];
+      prometheusConfig = {
+        scrape_configs = [
+          {
+            job_name = "node";
+            scrape_interval = "30s";
+            scrape_timeout = "29s";
+            metrics_path = "/metrics";
+            honor_labels = false;
+            honor_timestamps = true;
+            scheme = "http";
+            static_configs = [
+              {
+                targets = [ "127.0.0.1:9100" ];
+              }
+            ];
+          }
+        ] ++ (optional cfg.smokeping.enable {
+          job_name = "smokeping";
+          scrape_interval = "30s";
+          scrape_timeout = "29s";
+          metrics_path = "/metrics";
+          honor_labels = false;
+          honor_timestamps = true;
+          scheme = "http";
+          static_configs = [
+            {
+              targets = [ "127.0.0.1:9374" ];
+            }
+          ];
+        }) ++ (optional cfg.iperf3.enable {
+          job_name = "iperf3";
+          scrape_interval = "5m";
+          scrape_timeout = "30s";
+          metrics_path = "/probe";
+          honor_labels = false;
+          honor_timestamps = true;
+          scheme = "http";
+          static_configs = [
+            {
+              targets = [ cfg.iperf3.target ];
+            }
+          ];
+          relabel_configs = [
+            {
+              source_labels = [ "__address__" ];
+              target_label = "__param_target";
+            }
+            {
+              replacement = "127.0.0.1:9579";
+              target_label = "__address__";
+            }
+          ];
+        });
+      };
+    };
+
+    systemd.services.vmagent.serviceConfig = {
+      # define runtime dir
+      RuntimeDirectory = "vmagent";
+      RuntimeDirectoryMode = "0750";
+      # copy bearer token to runtime dir before start (as root)
+      ExecStartPre = [ "!${pkgs.writeShellScript "vmagent-bearer-setup" ''
+        set -euo pipefail
+        cp /var/lib/sparky/metrics_bearer /run/vmagent/bearer_token
+        chown vmagent:vmagent /run/vmagent/bearer_token
+        chmod 640 /run/vmagent/bearer_token
+      ''}"];
+    };
+
+    # used by telegraf
+    programs.mtr.enable = cfg.traceroute.enable;
+
+    # telegraf, exports to local vmagent
+    services.telegraf = mkIf cfg.traceroute.enable {
+      enable = true;
+      extraConfig = {
+        inputs = {
+          exec = map (target: {
+            commands = [ "${pkgs.mtr}/bin/mtr -C -n ${target}" ]; 
+            csv_column_names = [ "" "" "status" "dest" "hop" "ip" "loss" "snt" "" "" "avg" "best" "worst" "stdev" ];
+            csv_skip_rows = 1;
+            csv_tag_columns = [ "dest" "hop" "ip" ];
+            data_format = "csv";
+            name_override = "mtr_${replaceStrings [ "." ] [ "-" ] target}";
+            timeout = "40s";
+            interval = "30s";
+          }) cfg.traceroute.targets;
+        };
+        outputs = {
+          influxdb = {
+            database = "telegraf";
+            urls = [ "http://127.0.0.1:8429" ];
+          };
+        };
+      };
+    };
+
+    # Prometheus, scraped by local vmagent
     services.prometheus.exporters.node = {
       enable = true;
       listenAddress = "[${cfg.ip}]";
@@ -216,7 +364,7 @@ in {
       listenAddress = "[${cfg.ip}]";
       port = 9579;
       extraFlags = [
-        "-iperf3.path ${pkgs.iperf3d}/bin/iperf3d"
+        "-iperf3.path ${pkgs.iperf3d}/bin/iperf3d" # requires iperf3d from unstable / 23.11
         "-iperf3.port ${toString cfg.iperf3.targetPort}"
         "-iperf3.time 15s"
         "-iperf3.reverse"
@@ -225,20 +373,16 @@ in {
     systemd.services.prometheus-iperf3-exporter.environment = mkIf cfg.iperf3.enable {
       "IPERF3D_IPERF3_PATH" = "${pkgs.iperf3}/bin/iperf3";
     };
-    services.prometheus.exporters.smokeping = {
+    services.prometheus.exporters.smokeping = mkIf cfg.smokeping.enable {
       enable = true;
       listenAddress = "[${cfg.ip}]";
       port = 9374;
-      hosts = [
-        "a400.speedtest.wobcom.de"
-        "a209.speedtest.wobcom.de"
-        "a210.speedtest.wobcom.de"
-      ];
+      hosts = cfg.smokeping.targets;
     };
     # Wait for DNS after boot, then wait additional 10 seconds to make sure smokeping is ready
-    systemd.services.prometheus-smokeping-exporter.after = [ "smokeping-ready.service" ];
+    systemd.services.prometheus-smokeping-exporter.after = mkIf cfg.smokeping.enable [ "smokeping-ready.service" ];
 
-    systemd.services.smokeping-ready = {
+    systemd.services.smokeping-ready = mkIf cfg.smokeping.enable {
       description = "Helper service to delay smokeping start after boot";
       after = [ "network-online.target" "nss-lookup.target" ];
       wants = [ "network-online.target" ];
@@ -249,7 +393,7 @@ in {
         RemainAfterExit = true;
       };
       script = ''
-        until ${pkgs.host}/bin/host wobcom.de; do sleep 1; done
+        until ${pkgs.host}/bin/host ${cfg.smokeping.onlineCheckTarget}; do sleep 1; done
         sleep 10
       '';
     };
