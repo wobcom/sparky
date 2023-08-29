@@ -339,7 +339,7 @@ in {
             csv_skip_rows = 1;
             csv_tag_columns = [ "dest" "hop" "ip" ];
             data_format = "csv";
-            name_override = "mtr_${replaceStrings [ "." ] [ "-" ] target}";
+            name_override = "mtr_${replaceStrings [ "." "-" ] [ "_" "_" ] target}";
             timeout = "40s";
             interval = "30s";
           }) cfg.traceroute.targets;
