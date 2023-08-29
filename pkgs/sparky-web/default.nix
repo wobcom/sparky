@@ -2,17 +2,7 @@
 , fetchFromGitHub
 }:
 
-let
-  py = python311.override {
-    packageOverrides = python3-final: python3-prev: {
-      django-bootstrap5 = python3-final.callPackage ./python-modules/django-bootstrap5.nix { };
-      fontawesomefree = python3-final.callPackage ./python-modules/fontawesomefree.nix { };
-      macaddress = python3-final.callPackage ./python-modules/macaddress.nix { };
-      reprshed = python3-final.callPackage ./python-modules/reprshed.nix { };
-    };
-  };
-
-in py.pkgs.buildPythonApplication rec {
+python311.pkgs.buildPythonApplication rec {
   pname = "sparky-web";
   version = "1.3.0";
 
@@ -25,7 +15,7 @@ in py.pkgs.buildPythonApplication rec {
 
   format = "other";
 
-  propagatedBuildInputs = with py.pkgs; [
+  propagatedBuildInputs = with python311.pkgs; [
     django
     django-bootstrap5
     fontawesomefree
@@ -56,7 +46,7 @@ in py.pkgs.buildPythonApplication rec {
 
   passthru = {
     # PYTHONPATH of all dependencies used by the package
-    python = py;
-    pythonPath = py.pkgs.makePythonPath propagatedBuildInputs;
+    python = python311;
+    pythonPath = python311.pkgs.makePythonPath propagatedBuildInputs;
   };
 }
