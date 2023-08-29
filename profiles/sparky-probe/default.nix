@@ -356,12 +356,12 @@ in {
     # Prometheus, scraped by local vmagent
     services.prometheus.exporters.node = {
       enable = true;
-      listenAddress = "[${cfg.ip}]";
+      listenAddress = "127.0.0.1";
       port = 9100;
     };
     services.prometheus-local.exporters.iperf3 = mkIf cfg.iperf3.enable {
       enable = true;
-      listenAddress = "[${cfg.ip}]";
+      listenAddress = "127.0.0.1";
       port = 9579;
       extraFlags = [
         "-iperf3.path ${pkgs.iperf3d}/bin/iperf3d" # requires iperf3d from unstable / 23.11
@@ -375,7 +375,7 @@ in {
     };
     services.prometheus.exporters.smokeping = mkIf cfg.smokeping.enable {
       enable = true;
-      listenAddress = "[${cfg.ip}]";
+      listenAddress = "127.0.0.1";
       port = 9374;
       hosts = cfg.smokeping.targets;
     };
