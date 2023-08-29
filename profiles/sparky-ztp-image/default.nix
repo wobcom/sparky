@@ -88,7 +88,7 @@ in {
         PROBE_INIT_JSON=$(curl -X POST -F mac=$MAC_ADDRESS ${cfg.webURL}/api/v1/probe-init)
         API_KEY=$(echo $PROBE_INIT_JSON | jq -r '.data."api-key"' | tr -d '\n')
         HOSTNAME=$(echo $PROBE_INIT_JSON | jq -r .data.hostname | tr -d '\n')
-        METRICS_BEARER=$(echo $CONFIG_JSON | jq -r '.data."metrics-bearer"' | tr -d '\n')
+        METRICS_BEARER=$(echo $PROBE_INIT_JSON | jq -r '.data."metrics-bearer"' | tr -d '\n')
 
         REPO_BASE_URL=$(echo $PROBE_INIT_JSON | jq -r '.data."repo-url"' | tr -d '\n')
         REPO_ACCESS_TOKEN=$(echo $PROBE_INIT_JSON | jq -r '.data."access-token"' | tr -d '\n')
