@@ -333,16 +333,25 @@ in {
       enable = true;
       extraConfig = {
         inputs = {
-          exec = map (target: {
-            commands = [ "${pkgs.mtr}/bin/mtr -C -n ${target}" ]; 
+          exec = (map (target: {
+            commands = [ "${pkgs.mtr}/bin/mtr -4 -C -n ${target}" ]; 
             csv_column_names = [ "" "" "status" "dest" "hop" "ip" "loss" "snt" "" "" "avg" "best" "worst" "stdev" ];
             csv_skip_rows = 1;
             csv_tag_columns = [ "dest" "hop" "ip" ];
             data_format = "csv";
-            name_override = "mtr_${replaceStrings [ "." "-" ] [ "_" "_" ] target}";
+            name_override = "mtr_v4";
             timeout = "40s";
             interval = "30s";
-          }) cfg.traceroute.targets;
+          }) cfg.traceroute.targets) ++ (map (target: {
+            commands = [ "${pkgs.mtr}/bin/mtr -6 -C -n ${target}" ]; 
+            csv_column_names = [ "" "" "status" "dest" "hop" "ip" "loss" "snt" "" "" "avg" "best" "worst" "stdev" ];
+            csv_skip_rows = 1;
+            csv_tag_columns = [ "dest" "hop" "ip" ];
+            data_format = "csv";
+            name_override = "mtr_v6";
+            timeout = "40s";
+            interval = "30s";
+          }) cfg.traceroute.targets);
         };
         outputs = {
           influxdb = {
