@@ -202,15 +202,12 @@ in {
     systemd.services.sdmac-setup = mkIf cfg.sdMac.enable {
       description = "SD-MAC Setup";
       wantedBy = [ "multi-user.target" ];
-      before = [ "network.target" ];
+      after = [ "network-online.target" ];
       path = with pkgs; [ iproute2 gnused gawk ];
       serviceConfig = {
         Restart = "on-failure";
         RestartSec = 2;
         Type = "oneshot";
-        WorkingDirectory = "/var/lib/sparky";
-        User = "sparky";
-        Group = "sparky";
       };
       script = ''
         set -euo pipefail
@@ -450,7 +447,8 @@ in {
 
     systemd.services.smokeping-ready = mkIf cfg.smokeping.enable {
       description = "Helper service to delay smokeping start after boot";
-      after = [ "network-online.target" "nss-lookup.target" ];
+      after = [ "network-online.target" "nss-lookup.target" ]
+        ++ optionals cfg.sdMac.enable [ "sdmac-setup.service" ];
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {

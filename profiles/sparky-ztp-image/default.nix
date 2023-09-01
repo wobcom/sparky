@@ -89,15 +89,12 @@ in {
     systemd.services.sdmac-setup = mkIf cfg.sdMac.enable {
       description = "SD-MAC Setup";
       wantedBy = [ "multi-user.target" ];
-      before = [ "network.target" ];
+      after = [ "network-online.target" ];
       path = with pkgs; [ iproute2 gnused gawk ];
       serviceConfig = {
         Restart = "on-failure";
         RestartSec = 2;
         Type = "oneshot";
-        WorkingDirectory = "/var/lib/sparky";
-        User = "sparky";
-        Group = "sparky";
       };
       script = ''
         set -euo pipefail
@@ -115,7 +112,8 @@ in {
     systemd.services.sparky-setup = {
       description = "SPARKY Probe Setup";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      after = [ "network-online.target" ]
+        ++ optionals cfg.sdMac.enable [ "sdmac-setup.service" ];
       restartIfChanged = false;
       path = with pkgs; [ jq curl gnutar nixos-rebuild gzip gawk gnused ];
       serviceConfig = {
