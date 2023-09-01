@@ -16,18 +16,6 @@ in {
   };
 
   config = mkIf cfg.enable {
-    # grow partition at boot
-    boot.growPartition = true;
-
-    # image build stuff
-    system.build.raw = import "${toString modulesPath}/../lib/make-disk-image.nix" {
-      inherit lib config pkgs;
-      diskSize = "auto";
-      format = "raw";
-      bootSize = "512M";
-      partitionTableType = "efi";
-    };
-
     # system user
     users.users.sparky = {
       isSystemUser = true;
