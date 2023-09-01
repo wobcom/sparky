@@ -43,6 +43,37 @@ in {
       '';
     };
 
+    sdMac = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = mdDoc ''
+          Use the CID of the SD-Card for generating a unique and persistend MAC address.
+          Useful for devices that don't have a unique MAC address like the NanoPi R2S.
+        '';
+      };
+      macPrefix = mkOption {
+        type = types.str;
+        default = "aa:91:36";
+        description = mdDoc ''
+          Prefix (OUI) of the generated MAC addresses.
+        '';
+      };
+      blockDeviceName = mkOption {
+        type = types.str;
+        default = "mmcblk0";
+        description = mdDoc ''
+          Name of the block device of the SD-Card (on the device that will be the probe later).
+        '';
+      };
+      macInterfaceName = mkOption {
+        type = types.str;
+        description = mdDoc ''
+          The MAC address of this interface will be set to the generated MAC.
+        '';
+      };
+    };
+
     traceroute = {
       enable = mkOption {
         type = types.bool;
@@ -165,6 +196,32 @@ in {
         OnCalendar = "*:0/15"; # every 15 minutes
         AccuracySec = "1second";
       };
+    };
+
+    # SD-MAC setup
+    systemd.services.sdmac-setup = mkIf cfg.sdMac.enable {
+      description = "SD-MAC Setup";
+      wantedBy = [ "multi-user.target" ];
+      before = [ "network.target" ];
+      path = with pkgs; [ iproute2 gnused gawk ];
+      serviceConfig = {
+        Restart = "on-failure";
+        RestartSec = 2;
+        Type = "oneshot";
+        WorkingDirectory = "/var/lib/sparky";
+        User = "sparky";
+        Group = "sparky";
+      };
+      script = ''
+        set -euo pipefail
+
+        MAC_SUFFIX=$(cat /sys/block/${cfg.sdMac.blockDeviceName}/device/cid | md5sum | awk '{ print $1 }' | head -c 6 | sed -e 's/./&:/2' -e 's/./&:/5' | tr -d '\n')
+        MAC_ADDRESS="${cfg.sdMac.macPrefix}:$MAC_SUFFIX"
+
+        ip link set dev ${cfg.sdMac.macInterfaceName} down
+        ip link set dev ${cfg.sdMac.macInterfaceName} address $MAC_ADDRESS
+        ip link set dev ${cfg.sdMac.macInterfaceName} up
+      '';
     };
 
     # update service

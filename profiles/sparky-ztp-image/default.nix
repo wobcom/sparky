@@ -13,6 +13,39 @@ in {
         URL of the SPARKY-Web server. Must not have a tailing slash.
       '';
     };
+
+    macInterfaceName = mkOption {
+      type = types.str;
+      description = mdDoc ''
+        Name of the interface from which the MAC address is to be used for the ZTP.
+        If `sdMac` is enabled, the MAC address of this interface will be set to the generated MAC.
+      '';
+    };
+
+    sdMac = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = mdDoc ''
+          Use the CID of the SD-Card for generating a unique and persistend MAC address (also used for ZTP).
+          Useful for devices that don't have a unique MAC address like the NanoPi R2S.
+        '';
+      };
+      macPrefix = mkOption {
+        type = types.str;
+        default = "aa:91:36";
+        description = mdDoc ''
+          Prefix (OUI) of the generated MAC addresses.
+        '';
+      };
+      blockDeviceName = mkOption {
+        type = types.str;
+        default = "mmcblk0";
+        description = mdDoc ''
+          Name of the block device of the SD-Card (on the device that will be the probe later).
+        '';
+      };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -52,13 +85,12 @@ in {
       }
     ];
 
-    # setup service
-    systemd.services.sparky-setup = {
-      description = "SPARKY Probe Setup";
+    # SD-MAC setup
+    systemd.services.sdmac-setup = mkIf cfg.sdMac.enable {
+      description = "SD-MAC Setup";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
-      restartIfChanged = false;
-      path = with pkgs; [ jq curl gnutar nixos-rebuild gzip ];
+      before = [ "network.target" ];
+      path = with pkgs; [ iproute2 gnused gawk ];
       serviceConfig = {
         Restart = "on-failure";
         RestartSec = 2;
@@ -70,8 +102,41 @@ in {
       script = ''
         set -euo pipefail
 
-        INTERFACE_NAME=$(ls /sys/class/net/ | grep en | head -n 1 | tr -d '\n')
-        MAC_ADDRESS=$(cat /sys/class/net/$INTERFACE_NAME/address | tr -d '\n')
+        MAC_SUFFIX=$(cat /sys/block/${cfg.sdMac.blockDeviceName}/device/cid | md5sum | awk '{ print $1 }' | head -c 6 | sed -e 's/./&:/2' -e 's/./&:/5' | tr -d '\n')
+        MAC_ADDRESS="${cfg.sdMac.macPrefix}:$MAC_SUFFIX"
+
+        ip link set dev ${cfg.macInterfaceName} down
+        ip link set dev ${cfg.macInterfaceName} address $MAC_ADDRESS
+        ip link set dev ${cfg.macInterfaceName} up
+      '';
+    };
+
+    # setup service
+    systemd.services.sparky-setup = {
+      description = "SPARKY Probe Setup";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+      restartIfChanged = false;
+      path = with pkgs; [ jq curl gnutar nixos-rebuild gzip gawk gnused ];
+      serviceConfig = {
+        Restart = "on-failure";
+        RestartSec = 2;
+        Type = "oneshot";
+        WorkingDirectory = "/var/lib/sparky";
+        User = "sparky";
+        Group = "sparky";
+      };
+      script = ''
+        set -euo pipefail
+
+        ${optionalString (!cfg.sdMac.enable) ''
+          MAC_ADDRESS=$(cat /sys/class/net/${cfg.macInterfaceName}/address | tr -d '\n')
+        ''}
+
+        ${optionalString (cfg.sdMac.enable) ''
+          MAC_SUFFIX=$(cat /sys/block/${cfg.sdMac.blockDeviceName}/device/cid | md5sum | awk '{ print $1 }' | head -c 6 | sed -e 's/./&:/2' -e 's/./&:/5' | tr -d '\n')
+          MAC_ADDRESS="${cfg.sdMac.macPrefix}:$MAC_SUFFIX"
+        ''}
 
         PROBE_INIT_JSON=$(curl -X POST -F mac=$MAC_ADDRESS ${cfg.webURL}/api/v1/probe-init)
         API_KEY=$(echo $PROBE_INIT_JSON | jq -r '.data."api-key"' | tr -d '\n')
