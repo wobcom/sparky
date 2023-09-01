@@ -70,7 +70,7 @@ in {
       script = ''
         set -euo pipefail
 
-        INTERFACE_NAME=$(ls /sys/class/net/ | grep enp | tr -d '\n')
+        INTERFACE_NAME=$(ls /sys/class/net/ | grep en | head -n 1 | tr -d '\n')
         MAC_ADDRESS=$(cat /sys/class/net/$INTERFACE_NAME/address | tr -d '\n')
 
         PROBE_INIT_JSON=$(curl -X POST -F mac=$MAC_ADDRESS ${cfg.webURL}/api/v1/probe-init)
