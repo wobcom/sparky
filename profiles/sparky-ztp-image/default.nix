@@ -88,7 +88,7 @@ in {
 
         ${optionalString (config.profiles.sparky-sd-mac.enable) ''
           MAC_SUFFIX=$(cat /sys/block/${config.profiles.sparky-sd-mac.blockDeviceName}/device/serial | md5sum | awk '{ print $1 }' | head -c 6 | sed -e 's/./&:/2' -e 's/./&:/5' | tr -d '\n')
-          MAC_ADDRESS="${cconfig.profiles.sparky-sd-mac.macPrefix}:$MAC_SUFFIX"
+          MAC_ADDRESS="${config.profiles.sparky-sd-mac.macPrefix}:$MAC_SUFFIX"
         ''}
 
         PROBE_INIT_JSON=$(curl -X POST -F mac=$MAC_ADDRESS ${cfg.webURL}/api/v1/probe-init)
