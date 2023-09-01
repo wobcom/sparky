@@ -18,33 +18,8 @@ in {
       type = types.str;
       description = mdDoc ''
         Name of the interface from which the MAC address is to be used for the ZTP.
-        If `sdMac` is enabled, the MAC address of this interface will be set to the generated MAC.
+        If the SD-MAC profile is enabled, the MAC address of this interface will be set to the generated MAC.
       '';
-    };
-
-    sdMac = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = mdDoc ''
-          Use the CID of the SD-Card for generating a unique and persistend MAC address (also used for ZTP).
-          Useful for devices that don't have a unique MAC address like the NanoPi R2S.
-        '';
-      };
-      macPrefix = mkOption {
-        type = types.str;
-        default = "aa:91:36";
-        description = mdDoc ''
-          Prefix (OUI) of the generated MAC addresses.
-        '';
-      };
-      blockDeviceName = mkOption {
-        type = types.str;
-        default = "mmcblk0";
-        description = mdDoc ''
-          Name of the block device of the SD-Card (on the device that will be the probe later).
-        '';
-      };
     };
   };
 
@@ -85,35 +60,15 @@ in {
       }
     ];
 
-    # SD-MAC setup
-    systemd.services.sdmac-setup = mkIf cfg.sdMac.enable {
-      description = "SD-MAC Setup";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network-online.target" ];
-      path = with pkgs; [ iproute2 gnused gawk ];
-      serviceConfig = {
-        Restart = "on-failure";
-        RestartSec = 2;
-        Type = "oneshot";
-      };
-      script = ''
-        set -euo pipefail
-
-        MAC_SUFFIX=$(cat /sys/block/${cfg.sdMac.blockDeviceName}/device/serial | md5sum | awk '{ print $1 }' | head -c 6 | sed -e 's/./&:/2' -e 's/./&:/5' | tr -d '\n')
-        MAC_ADDRESS="${cfg.sdMac.macPrefix}:$MAC_SUFFIX"
-
-        ip link set dev ${cfg.macInterfaceName} down
-        ip link set dev ${cfg.macInterfaceName} address $MAC_ADDRESS
-        ip link set dev ${cfg.macInterfaceName} up
-      '';
-    };
+    # SD-MAC support
+    profiles.sparky-sd-mac.macInterfaceName = cfg.macInterfaceName;
 
     # setup service
     systemd.services.sparky-setup = {
       description = "SPARKY Probe Setup";
       wantedBy = [ "multi-user.target" ];
       after = [ "network-online.target" ]
-        ++ optionals cfg.sdMac.enable [ "sdmac-setup.service" ];
+        ++ optionals config.profiles.sparky-sd-mac.enable [ "sdmac-setup.service" ];
       restartIfChanged = false;
       path = with pkgs; [ jq curl gnutar nixos-rebuild gzip gawk gnused ];
       serviceConfig = {
@@ -127,13 +82,13 @@ in {
       script = ''
         set -euo pipefail
 
-        ${optionalString (!cfg.sdMac.enable) ''
+        ${optionalString (!config.profiles.sparky-sd-mac.enable) ''
           MAC_ADDRESS=$(cat /sys/class/net/${cfg.macInterfaceName}/address | tr -d '\n')
         ''}
 
-        ${optionalString (cfg.sdMac.enable) ''
-          MAC_SUFFIX=$(cat /sys/block/${cfg.sdMac.blockDeviceName}/device/serial | md5sum | awk '{ print $1 }' | head -c 6 | sed -e 's/./&:/2' -e 's/./&:/5' | tr -d '\n')
-          MAC_ADDRESS="${cfg.sdMac.macPrefix}:$MAC_SUFFIX"
+        ${optionalString (config.profiles.sparky-sd-mac.enable) ''
+          MAC_SUFFIX=$(cat /sys/block/${config.profiles.sparky-sd-mac.blockDeviceName}/device/serial | md5sum | awk '{ print $1 }' | head -c 6 | sed -e 's/./&:/2' -e 's/./&:/5' | tr -d '\n')
+          MAC_ADDRESS="${cconfig.profiles.sparky-sd-mac.macPrefix}:$MAC_SUFFIX"
         ''}
 
         PROBE_INIT_JSON=$(curl -X POST -F mac=$MAC_ADDRESS ${cfg.webURL}/api/v1/probe-init)
