@@ -212,7 +212,7 @@ in {
       script = ''
         set -euo pipefail
 
-        MAC_SUFFIX=$(cat /sys/block/${cfg.sdMac.blockDeviceName}/device/cid | md5sum | awk '{ print $1 }' | head -c 6 | sed -e 's/./&:/2' -e 's/./&:/5' | tr -d '\n')
+        MAC_SUFFIX=$(cat /sys/block/${cfg.sdMac.blockDeviceName}/device/serial | md5sum | awk '{ print $1 }' | head -c 6 | sed -e 's/./&:/2' -e 's/./&:/5' | tr -d '\n')
         MAC_ADDRESS="${cfg.sdMac.macPrefix}:$MAC_SUFFIX"
 
         ip link set dev ${cfg.sdMac.macInterfaceName} down
