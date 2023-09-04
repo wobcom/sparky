@@ -1,16 +1,18 @@
 { python311
 , fetchFromGitHub
+
+, plugins ? ps: []
 }:
 
 python311.pkgs.buildPythonApplication rec {
   pname = "sparky-web";
-  version = "1.3.0";
+  version = "1.4.0";
 
   src = fetchFromGitHub {
     owner = "wobcom";
     repo = pname;
     rev = "v${version}";
-    sha256 = "sha256-n8egAHBLu75uP69s1Ktw7rKF0QYLXbIbMQ5f5bQqhnU=";
+    sha256 = "sha256-ZdUdHBHFdWiFpqhgZbE5OAQoMtyFrRFFU0ZLKbLJFtQ=";
   };
 
   format = "other";
@@ -24,7 +26,7 @@ python311.pkgs.buildPythonApplication rec {
     requests
     pytz
     gitpython
-  ];
+  ] ++ plugins python311.pkgs;
 
   buildPhase = ''
     runHook preBuild

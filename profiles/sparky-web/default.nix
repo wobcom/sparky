@@ -35,8 +35,12 @@ let
   pkg = (pkgs.sparky-web.overrideAttrs (old: {
     postInstall = ''
       ln -s ${configFile} $out/opt/sparky-web/sparky_web/configuration.py
+    '' + optionalString cfg.enableLdap ''
+      ln -s ${cfg.ldapConfigPath} $out/opt/sparky-web/sparky_web/ldap_config.py
     '';
-  }));
+  })).override {
+    inherit (cfg) plugins;
+  };
   sparkyWebManageScript = with pkgs; (writeScriptBin "sparky-web-manage" ''
     #!${stdenv.shell}
     export PYTHONPATH=${pkg.pythonPath}
@@ -73,6 +77,34 @@ in {
       type = types.str;
       description = mdDoc ''
         The FQDN for the nginx vHost of SPARKY-Web.
+      '';
+    };
+
+    plugins = mkOption {
+      type = types.functionTo (types.listOf types.package);
+      default = _: [];
+      defaultText = literalExpression ''
+        python3Packages: with python3Packages; [];
+      '';
+      description = lib.mdDoc ''
+        List of plugin packages to install.
+      '';
+    };
+
+    enableLdap = mkOption {
+      type = types.bool;
+      default = false;
+      description = lib.mdDoc ''
+        Enable LDAP-Authentication for SPARKY-Web.
+
+        This requires a configuration file being pass through `ldapConfigPath`.
+      '';
+    };
+
+    ldapConfigPath = mkOption {
+      type = types.path;
+      description = lib.mdDoc ''
+        Path to the Configuration-File for LDAP-Authentication, will be loaded as `ldap_config.py`.
       '';
     };
 
@@ -168,6 +200,8 @@ in {
 
   config = mkIf cfg.enable {
     system.build.sparkyWebPkg = pkg;
+
+    profiles.sparky-web.plugins = mkIf cfg.enableLdap (ps: [ ps.django-auth-ldap ]);
 
     services.postgresql = {
       enable = true;
