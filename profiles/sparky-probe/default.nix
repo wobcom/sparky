@@ -43,6 +43,28 @@ in {
       '';
     };
 
+    blackbox = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = mdDoc ''
+          Enable blackbox tests from this probe.
+        '';
+      };
+      httpTargets = mkOption {
+        type = types.listOf types.str;
+        description = mdDoc ''
+          Targets for the blackbox HTTP tests tests.
+        '';
+        default = [
+          "https://apple.com"
+          "https://google.com"
+          "https://wikipedia.com"
+          "https://youtube.com"
+        ];
+      };
+    };
+
     traceroute = {
       enable = mkOption {
         type = types.bool;
@@ -272,7 +294,70 @@ in {
               }
             ];
           }
-        ] ++ (optional cfg.smokeping.enable {
+        ] ++ (optionals cfg.blackbox.enable [
+          {
+            job_name = "blackbox-http-v4";
+            scrape_interval = "30s";
+            scrape_timeout = "29s";
+            metrics_path = "/probe";
+            honor_labels = false;
+            honor_timestamps = true;
+            scheme = "http";
+            params = {
+              module = [ "http_2xx_v4" ];
+            };
+            static_configs = [
+              {
+                targets = cfg.blackbox.httpTargets;
+              }
+            ];
+            relabel_configs = [
+              {
+                source_labels = [ "__address__" ];
+                target_label = "__param_target";
+              }
+              {
+                source_labels = [ "__param_target" ];
+                target_label = "target";
+              }
+              {
+                replacement = "127.0.0.1:9115";
+                target_label = "__address__";
+              }
+            ];
+          }
+          {
+            job_name = "blackbox-http-v6";
+            scrape_interval = "30s";
+            scrape_timeout = "29s";
+            metrics_path = "/probe";
+            honor_labels = false;
+            honor_timestamps = true;
+            scheme = "http";
+            params = {
+              module = [ "http_2xx_v6" ];
+            };
+            static_configs = [
+              {
+                targets = cfg.blackbox.httpTargets;
+              }
+            ];
+            relabel_configs = [
+              {
+                source_labels = [ "__address__" ];
+                target_label = "__param_target";
+              }
+              {
+                source_labels = [ "__param_target" ];
+                target_label = "target";
+              }
+              {
+                replacement = "127.0.0.1:9115";
+                target_label = "__address__";
+              }
+            ];
+          }
+        ]) ++ (optional cfg.smokeping.enable {
           job_name = "smokeping";
           scrape_interval = "30s";
           scrape_timeout = "29s";
@@ -367,6 +452,35 @@ in {
       enable = true;
       listenAddress = "127.0.0.1";
       port = 9100;
+    };
+    services.prometheus.exporters.blackbox = mkIf cfg.blackbox.enable {
+      enable = true;
+      listenAddress = "127.0.0.1";
+      port = 9115;
+      configFile = pkgs.writeText "blackbox-exporter-config" (builtins.toJSON {
+        modules = {
+          http_2xx_v4 = {
+            prober = "http";
+            timeout = "5s";
+            http = {
+              method = "GET";
+              ip_protocol_fallback = false;
+              no_follow_redirects = false;
+              preferred_ip_protocol = "ip4";
+            };
+          };
+          http_2xx_v6 = {
+            prober = "http";
+            timeout = "5s";
+            http = {
+              method = "GET";
+              ip_protocol_fallback = false;
+              no_follow_redirects = false;
+              preferred_ip_protocol = "ip6";
+            };
+          };
+        };
+      });
     };
     services.prometheus-local.exporters.iperf3 = mkIf cfg.iperf3.enable {
       enable = true;
