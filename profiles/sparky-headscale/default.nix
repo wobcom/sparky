@@ -92,8 +92,6 @@ in {
         ip_prefixes = [ "100.64.0.0/10" ]; # use default headscale prefix
         acl_policy_path = let
           headscaleIP = config.profiles.sparky-tailnet.ip;
-          
-          isProd = any (x: x == "prod") config.deployment.tags;
         in pkgs.writeText "headscale-acl" (builtins.toJSON {
           hosts = {
             "host:headscale" = "${headscaleIP}/128";
