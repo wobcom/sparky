@@ -38,7 +38,7 @@ in {
       };
 
       regionID = mkOption {
-        type = types.str;
+        type = types.int;
         description = mdDoc ''
           Region ID for the local DERP server.
         '';
