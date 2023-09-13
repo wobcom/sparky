@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./sparky-headscale
     ./sparky-metrics
     ./sparky-probe
     ./sparky-sd-mac

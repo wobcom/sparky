@@ -7,6 +7,7 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, ... }: {
+    nixosModules.sparky-headscale = ./profiles/sparky-headscale;
     nixosModules.sparky-metrics = ./profiles/sparky-metrics;
     nixosModules.sparky-probe = ./profiles/sparky-probe;
     nixosModules.sparky-sd-mac = ./profiles/sparky-sd-mac;
