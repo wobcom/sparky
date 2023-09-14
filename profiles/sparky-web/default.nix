@@ -228,7 +228,7 @@ in {
       script = ''
         mkdir -p .ssh
 
-        if [[ -s .ssh/known_hosts ]]; then
+        if [[ ! -s .ssh/known_hosts ]]; then
           ssh-keyscan ${cfg.probeRepoHost} > .ssh/known_hosts
         fi
 
