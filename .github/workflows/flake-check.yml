@@ -1,9 +1,10 @@
-name: "Nix Flake Check"
+name: "Nix Flake Check + Eval"
 on: [push]
 jobs:
-  check-flake:
+  check-eval-flake:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v22
       - run: nix flake check
+      - run: nix-shell -p nixos-rebuild --run "nixos-rebuild build --flake .#ci-test"

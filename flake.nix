@@ -17,6 +17,19 @@
     nixosModules.iperf3-exporter = ./modules/iperf3-exporter;
     nixosModules.default = ./modules.nix;
 
+    nixosConfigurations.ci-test = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        ./ci/ci-nixos-config.nix
+        self.nixosModules.default
+        {
+          nixpkgs.overlays = [
+            self.overlays.default
+          ];
+        }
+      ];
+    };
+
     overlays.default = (import ./pkgs);
   } // flake-utils.lib.eachDefaultSystem (system: let
     pkgs = nixpkgs.legacyPackages.${system};
