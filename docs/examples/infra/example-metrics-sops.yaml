@@ -1,0 +1,4 @@
+metrics-api-key: your metrics api key
+htpasswd: |
+    admin:$apr1$adminpwhash
+    grafana:$apr1$grafanapwhash
