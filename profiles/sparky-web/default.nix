@@ -29,6 +29,17 @@ let
       with open("${cfg.metricsApiKeyFile}", "r") as file:
         METRICS_API_KEY = file.readline()
 
+      HEADSCALE_URL = "${cfg.headscaleURL}"
+      PROBE_REPO_URL = "${cfg.probeRepoURL}"
+
+      PROBE_NIXOS_STATE_VERSION = "${cfg.probeNixOSStateVersion}"
+
+      PROBE_TAILNET_SUBNET = "${cfg.probeSubnet}"
+
+      PROBE_HOSTNAME_PREFIX = "${cfg.probeHostnamePrefix}"
+
+      TIME_ZONE = '${if config.time.timeZone != null then config.time.timeZone else "UTC"}'
+
       ${cfg.extraConfig}
     '';
   };
@@ -186,6 +197,44 @@ in {
       '';
       description = mdDoc ''
         With this option, you can customize the nginx virtualHost settings.
+      '';
+    };
+
+    headscaleURL = mkOption {
+      type = types.str;
+      description = mdDoc ''
+        URL of the headscale server.
+      '';
+    };
+
+    probeRepoURL = mkOption {
+      type = types.str;
+      example = "https://gitlab.com/api/v4/projects/XXXXX/repository/";
+      description = mdDoc ''
+        URL of the GitLab API endpoint for the probe config repo.
+      '';
+    };
+
+    probeNixOSStateVersion = mkOption {
+      type = types.str;
+      default = "23.05";
+      description = mdDoc ''
+        NixOS state version for the generated probe NixOS configurations.
+      '';
+    };
+
+    probeSubnet = mkOption {
+      type = types.str;
+      description = mdDoc ''
+        Subnet of the probes in the tailnet.
+      '';
+    };
+
+    probeHostnamePrefix = mkOption {
+      type = types.str;
+      default = "probe";
+      description = mdDoc ''
+        Prefix for the hostnames of the probes (the text before the number of the probe).
       '';
     };
 

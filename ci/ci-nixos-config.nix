@@ -73,18 +73,9 @@
     propeRepoSSHDeployPubKeyFile = "/invalid/path";
     probeRepoAccessTokenFile = "/invalid/path";
     metricsApiKeyFile = "/invalid/path";
-    extraConfig = ''
-      HEADSCALE_URL = "https://sparky-headscale.example.com"
-      PROBE_REPO_URL = "https://gitlab.com/api/v4/projects/XXXXX/repository/" # replace XXXXX with your GitLab project ID
-
-      PROBE_NIXOS_STATE_VERSION = "23.05"
-
-      PROBE_TAILNET_SUBNET = "fdb0:34ac:df2e:3::/64"
-
-      PROBE_HOSTNAME_PREFIX = "probe"
-
-      TIME_ZONE = 'Europe/Berlin'
-    '';
+    headscaleURL = "https://sparky-headscale.example.com";
+    probeRepoURL = "https://gitlab.com/api/v4/projects/XXXXX/repository/"; # replace XXXXX with your GitLab project ID
+    probeSubnet = "fdb0:34ac:df2e:3::/64";
   };
 
   profiles.sparky-ztp-image = {
