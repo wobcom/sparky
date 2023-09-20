@@ -132,7 +132,7 @@ Now that you have set up the infrastructure, it is time to set up your first pro
 - Finally, you can enable the IP of the probe by clicking on the `disabled` next to it
 - Then the probe should start pushing metrics to the VictoriaMetrics server
 
-Note for the ZTP MAC addresses: some hardware, like the NanoPi R2S (for which we already included a hardware profile), does not have unique MAC addresses. For this, we have build a [SD-MAC module](./profiles/sparky-sd-mac/default.nix), which generates a MAC address based of the serial number of the SD card. To get the MAC address from a SD card, you can use the [generate-sd-mac.sh helper script](./docs/examples/probe-repo/generate-sd-mac.sh) from the probe repo to generate a MAC address from a SD card that is currently plugged in your computer.
+Note for the ZTP MAC addresses: some hardware, like the NanoPi R2S (for which we already included a hardware profile), does not have unique MAC addresses. For this, we have build an [SD-MAC profile](./profiles/sparky-sd-mac/default.nix), which generates a MAC address based of the serial number of the SD card. To get the MAC address from a SD card, you can use the [generate-sd-mac.sh helper script](./docs/examples/probe-repo/generate-sd-mac.sh) from the probe repo to generate a MAC address from a SD card that is currently plugged in your computer.
 
 Note: for security reasons, the ZTP API request with the probes' MAC address can only be made one time and every following request with this MAC address will be rejected. For that, the probe receives an API key with much more entropy than a MAC address, which it can then use in its following requests.
 
