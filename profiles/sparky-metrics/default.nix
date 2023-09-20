@@ -150,7 +150,9 @@ in {
         {
           locations."/" = {
             proxyPass = "http://127.0.0.1:8428";
-            extraConfig = proxyConfig;
+            extraConfig = ''
+              deny ${cfg.probeSubnet};
+            '' + proxyConfig;
           };
         }
       ];
