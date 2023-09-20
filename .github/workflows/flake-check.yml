@@ -8,5 +8,4 @@ jobs:
       - uses: cachix/install-nix-action@v22
       - run: |
           nix flake check
-          nix-channel --add https://nixos.org/channels/nixos-unstable nixos
-          nix-shell -p nixos-rebuild --run "nixos-rebuild build --flake .#ci-test"
+          nix build .#nixosConfigurations.ci-test.config.system.build.toplevel
