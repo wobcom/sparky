@@ -7,7 +7,7 @@ in {
   options.profiles.sparky-sd-mac = {
     enable = mkEnableOption (mdDoc ''
       Enable the SPARKY SD-MAC profile.
-      Use the CID of the SD-Card for generating a unique and persistend MAC address.
+      Use the serial number of the SD-Card for generating a unique and persistend MAC address.
       Useful for devices that don't have a unique MAC address like the NanoPi R2S.
     '');
     macPrefix = mkOption {
