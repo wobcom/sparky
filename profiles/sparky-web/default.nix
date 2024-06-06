@@ -259,9 +259,7 @@ in {
       ensureUsers = [
         {
           name = "sparky-web";
-          ensurePermissions = {
-            "DATABASE \"sparky-web\"" = "ALL PRIVILEGES";
-          };
+          ensureDBOwnership = true;
         }
       ];
     };
