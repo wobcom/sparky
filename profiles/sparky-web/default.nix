@@ -70,7 +70,7 @@ in {
 
     listenAddress = mkOption {
       type = types.str;
-      default = "[::1]";
+      default = "127.0.0.1";
       description = mdDoc ''
         Address the server will listen on.
       '';
