@@ -8,6 +8,7 @@ let
     name = "configuration.py";
     text = ''
       ALLOWED_HOSTS = ['*']
+      CSRF_TRUSTED_ORIGINS = ['https://${cfg.fqdn}']
       DATABASE = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'sparky-web',
