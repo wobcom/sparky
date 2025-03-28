@@ -33,16 +33,22 @@ in {
 
   config = mkIf cfg.enable {
     systemd.network = {
-        enable = true;
-        networks = {
-          "20-lo" = {
-            name = "lo";
-            address = [
-              "${cfg.ip}/128" 
-            ];
-          };
+      enable = true;
+      networks = {
+        "20-lo" = {
+          name = "lo";
+          address = [
+            "${cfg.ip}/128" 
+          ];
+        };
+
+        "30-interfaces" = {
+          ipv6AcceptRAConfig = ''
+            PrefixDenyList=fd00::/8
+          '';
         };
       };
+    };
 
     systemd.services.tailscale-setup = {
       description = "Tailscale initial setup and connect at startup";
