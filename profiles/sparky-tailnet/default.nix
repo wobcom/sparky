@@ -43,9 +43,9 @@ in {
         };
 
         "30-interfaces" = {
-          ipv6AcceptRAConfig = ''
-            PrefixDenyList=fd00::/8
-          '';
+          ipv6AcceptRAConfig = {
+            PrefixDenyList = "fd00::/8"; 
+          }
         };
       };
     };
