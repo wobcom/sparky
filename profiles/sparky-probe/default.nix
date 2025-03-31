@@ -372,7 +372,7 @@ in {
           ];
         }) ++ (optional cfg.iperf3.enable {
           job_name = "iperf3";
-          scrape_interval = "5m";
+          scrape_interval = "2m";
           scrape_timeout = "30s";
           metrics_path = "/probe";
           honor_labels = false;
