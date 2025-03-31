@@ -35,8 +35,8 @@ in {
     systemd.network = {
       enable = true;
       networks = {
-        "20-tailscale0" = {
-          name = "tailscale0";
+        "20-lo" = {
+          name = "lo";
           address = [
             "${cfg.ip}/128" 
           ];
