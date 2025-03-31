@@ -263,6 +263,7 @@ in {
     networking.nftables.enable = true;
 
     # the probes get their IPs over DHCP
+    networking.useNetworkd = true;
     networking.useDHCP = true;
 
     # configure tailnet
