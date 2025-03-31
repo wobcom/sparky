@@ -34,13 +34,15 @@ in {
   config = mkIf cfg.enable {
     systemd.network = {
       enable = true;
+      config = {
+        networkConfig.ManageForeignRoutes = false;
+      };
       networks = {
         "20-tailscale0" = {
           name = "tailscale0";
           address = [
             "${cfg.ip}/128" 
           ];
-          networkConfig.ManageForeignRoutes = false;
         };
       };
     };
