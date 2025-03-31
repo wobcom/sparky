@@ -35,11 +35,12 @@ in {
     systemd.network = {
       enable = true;
       networks = {
-        "20-lo" = {
-          name = "lo";
+        "20-tailscale0" = {
+          name = "tailscale0";
           address = [
             "${cfg.ip}/128" 
           ];
+          networkConfig.ManageForeignRoutes = false;
         };
       };
     };
