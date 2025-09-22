@@ -252,12 +252,12 @@ in {
     };
 
     # Limit SSH to tailnet IP
-    services.openssh.openFirewall = true;
+    services.openssh.openFirewall = mkForce false;
 
     # Firewall limitations to tailnet IPs
-    # networking.firewall.extraInputRules = (''
-    #   ip6 daddr ${cfg.ip} ip6 saddr ${cfg.headscaleIP} tcp dport 22 accept comment "SSH from headscale"
-    # '');
+    networking.firewall.extraInputRules = (''
+      ip6 daddr ${cfg.ip} ip6 saddr ${cfg.headscaleIP} tcp dport 22 accept comment "SSH from headscale"
+    '');
 
     # we need nftables for our firewall rules above
     networking.nftables.enable = true;
