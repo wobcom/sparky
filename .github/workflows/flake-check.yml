@@ -4,8 +4,8 @@ jobs:
   check-eval-flake:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v22
+      - uses: actions/checkout@v5
+      - uses: cachix/install-nix-action@v31
       - run: |
           nix flake check
           nix build .#nixosConfigurations.ci-test.config.system.build.toplevel
