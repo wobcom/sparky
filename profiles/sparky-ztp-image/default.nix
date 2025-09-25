@@ -67,6 +67,7 @@ in {
     systemd.services.sparky-setup = {
       description = "SPARKY Probe Setup";
       wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ];
       after = [ "network-online.target" ]
         ++ optionals config.profiles.sparky-sd-mac.enable [ "sdmac-setup.service" ];
       restartIfChanged = false;

@@ -32,6 +32,7 @@ in {
   };
 
   config = mkIf cfg.enable {
+    networking.useNetworkd = true;
     systemd.network = {
       enable = true;
       config = {

@@ -276,7 +276,7 @@ in {
     services.vmagent = {
       enable = true;
       package = pkgs.victoriametrics;
-      remoteWriteUrl = "http://[${cfg.metricsIP}]/remote_write";
+      remoteWrite.url = "http://[${cfg.metricsIP}]/remote_write";
       extraArgs = [ "-remoteWrite.bearerTokenFile=/run/vmagent/bearer_token" "-enableTCP6" ];
       prometheusConfig = {
         scrape_configs = [

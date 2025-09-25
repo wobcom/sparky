@@ -37,6 +37,7 @@ in {
     systemd.services.sdmac-setup = {
       description = "SD-MAC Setup";
       wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ];
       after = [ "network-online.target" ];
       path = with pkgs; [ iproute2 gnused gawk ];
       serviceConfig = {

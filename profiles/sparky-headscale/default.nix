@@ -87,10 +87,13 @@ in {
       port = 8080;
       settings = {
         server_url = "https://${cfg.fqdn}";
-        dns_config.nameservers = [ "1.1.1.1" "1.0.0.1" ];
-        db_port = 5432;
+        dns = {
+          nameservers.global = [ "1.1.1.1" "1.0.0.1" ];
+          magic_dns = false;
+        };
+        database.postgres.port = 5432;
         ip_prefixes = [ "100.64.0.0/10" ]; # use default headscale prefix
-        acl_policy_path = let
+        policy.path = let
           headscaleIP = config.profiles.sparky-tailnet.ip;
         in pkgs.writeText "headscale-acl" (builtins.toJSON {
           hosts = {

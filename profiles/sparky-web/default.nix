@@ -270,6 +270,7 @@ in {
     systemd.services.sparky-web-repo-setup = {
       description = "SPARKY Web probe config repo initialization";
       wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ];
       after = [ "network-online.target" ];
       path = with pkgs; [ git openssh ];
 
@@ -304,6 +305,7 @@ in {
     systemd.services.sparky-web = {
       description = "SPARKY Web";
       wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ];
       after = [ "network-online.target" "sparky-web-repo-init.service" ];
       path = with pkgs; [ git openssh ];
 
