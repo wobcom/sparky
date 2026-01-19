@@ -1,10 +1,10 @@
-{ python311
+{ python3
 , fetchFromGitHub
 
 , plugins ? ps: []
 }:
 
-python311.pkgs.buildPythonApplication rec {
+python3.pkgs.buildPythonApplication rec {
   pname = "sparky-web";
   version = "1.7.1";
 
@@ -17,7 +17,7 @@ python311.pkgs.buildPythonApplication rec {
 
   format = "other";
 
-  propagatedBuildInputs = with python311.pkgs; [
+  propagatedBuildInputs = with python3.pkgs; [
     django
     django-bootstrap5
     fontawesomefree
@@ -26,7 +26,7 @@ python311.pkgs.buildPythonApplication rec {
     requests
     pytz
     gitpython
-  ] ++ plugins python311.pkgs;
+  ] ++ plugins python3.pkgs;
 
   buildPhase = ''
     runHook preBuild
@@ -48,7 +48,7 @@ python311.pkgs.buildPythonApplication rec {
 
   passthru = {
     # PYTHONPATH of all dependencies used by the package
-    python = python311;
-    pythonPath = python311.pkgs.makePythonPath propagatedBuildInputs;
+    python = python3;
+    pythonPath = python3.pkgs.makePythonPath propagatedBuildInputs;
   };
 }
