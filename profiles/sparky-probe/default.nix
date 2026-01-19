@@ -490,7 +490,7 @@ in {
         "-iperf3.path ${pkgs.iperf3d}/bin/iperf3d" # requires iperf3d from unstable / 23.11
         "-iperf3.port ${toString cfg.iperf3.targetPort}"
         "-iperf3.time 15s"
-        "-iperf3.reverse"
+        "-iperf3.bidir"
       ] ++ optional (cfg.iperf3.bandwidthLimit != null) "-iperf3.bandwidth ${toString cfg.iperf3.bandwidthLimit}";
     };
     systemd.services.prometheus-iperf3-exporter.environment = mkIf cfg.iperf3.enable {
