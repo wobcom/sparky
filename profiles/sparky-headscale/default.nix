@@ -97,17 +97,17 @@ in {
           headscaleIP = config.profiles.sparky-tailnet.ip;
         in pkgs.writeText "headscale-acl" (builtins.toJSON {
           hosts = {
-            "host:headscale" = "${headscaleIP}/128";
-            "host:metrics" = "${cfg.metricsIP}/128";
-            "host:probes" = "${cfg.probeSubnet}";
+            "headscale" = "${headscaleIP}/128";
+            "metrics" = "${cfg.metricsIP}/128";
+            "probes" = "${cfg.probeSubnet}";
           };
           acls = [
             {
               # Allow SSH Headscale --> Probes
               action = "accept";
               proto = "tcp";
-              src = [ "host:headscale" ];
-              dst = [ "host:probes:22" ];
+              src = [ "headscale" ];
+              dst = [ "probes:22" ];
             }
             {
               # Allow ICMPv6
@@ -120,8 +120,8 @@ in {
               # Allow VM remote_write Probes --> Metrics
               action = "accept";
               proto = "tcp";
-              src = [ "host:probes" ];
-              dst = [ "host:metrics:80" ];
+              src = [ "probes" ];
+              dst = [ "metrics:80" ];
             }
           ];
         });
