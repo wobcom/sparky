@@ -6,13 +6,13 @@
 
 python3.pkgs.buildPythonApplication rec {
   pname = "sparky-web";
-  version = "1.8.2";
+  version = "1.8.3";
 
   src = fetchFromGitHub {
     owner = "wobcom";
     repo = pname;
     rev = "v${version}";
-    hash = "sha256-nAi17QoDsN3dAmq+yBRDw2ZilPuyLAEiVTlarwo9sFc=";
+    hash = "sha256-ATD5ofy+fjSdeqPBIHmPeCe0yyH/LFocp2IgS9Mop1A=";
   };
 
   format = "other";
